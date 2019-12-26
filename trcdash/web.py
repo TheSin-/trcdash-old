@@ -105,6 +105,13 @@ def access_denied(e):
 
 @webapp.route('/')
 def index():
+    data = {
+    }
+
+    return render_template('index.html', **data)
+
+@webapp.route('/dashboard')
+def dashboard():
     sysinfo = current_service.get_sysinfo()
 
     netifs = current_service.get_network_interfaces().values()
@@ -123,7 +130,7 @@ def index():
         'is_xhr': request.is_xhr
     }
 
-    return render_template('index.html', **data)
+    return render_template('dashboard.html', **data)
 
 
 @webapp.route('/processes', defaults={'sort': 'cpu_percent', 'order': 'desc', 'filter': 'user'})

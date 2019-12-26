@@ -50,6 +50,12 @@
                 <div class="content">
                     <div class="left-nav">
                         <ul class="menu">
+                            <li {% if page == "terracoin" %}class="active"{% endif %}>
+                                <a href="{{ url_for(".index") }}">
+                                    <span class="glyphicon glyphicon-globe"></span>
+                                    <span class="option-text">Terracoin</span>
+                                </a>
+                            </li>
                             <li {% if page == "overview" %}class="active"{% endif %}>
                                 <a href="{{ url_for(".index") }}">
                                     <span class="glyphicon glyphicon-th"></span>
