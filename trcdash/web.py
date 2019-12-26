@@ -41,8 +41,8 @@ def inject_header_data():
     uptime = timedelta(seconds=sysinfo['uptime'])
     uptime = str(uptime).split('.')[0]
     return {
-        'os': sysinfo['os'].decode('utf-8'),
-        'hostname': sysinfo['hostname'].decode('utf-8'),
+        'os': sysinfo['os'],
+        'hostname': sysinfo['hostname'],
         'uptime': uptime
     }
 
@@ -106,6 +106,8 @@ def access_denied(e):
 @webapp.route('/')
 def index():
     data = {
+        'page': 'terracoin',
+        'is_xhr': request.is_xhr
     }
 
     return render_template('index.html', **data)
@@ -115,7 +117,7 @@ def dashboard():
     sysinfo = current_service.get_sysinfo()
 
     netifs = current_service.get_network_interfaces().values()
-    netifs.sort(key=lambda x: x.get('bytes_sent'), reverse=True)
+    netifs = sorted(netifs, key=lambda x: x.get('bytes_sent'), reverse=True)
 
     data = {
         'load_avg': sysinfo['load_avg'],
@@ -146,7 +148,8 @@ def processes(sort='pid', order='asc', filter='user'):
     if filter == 'user':
         procs = user_procs
 
-    procs.sort(
+    procs = sorted(
+        procs,
         key=lambda x: x.get(sort),
         reverse=True if order != 'asc' else False
     )
@@ -195,7 +198,7 @@ def process(pid, section):
         whitelist = current_app.config.get('TRCDASH_ENVIRON_WHITELIST')
         if whitelist:
             penviron = dict((k, v if k in whitelist else '*hidden by whitelist*') 
-                             for k, v in penviron.iteritems())
+                             for k, v in penviron.items())
 
         context['process_environ'] = penviron
     elif section == 'threads':
@@ -220,7 +223,7 @@ def process(pid, section):
 @webapp.route('/network')
 def view_networks():
     netifs = current_service.get_network_interfaces().values()
-    netifs.sort(key=lambda x: x.get('bytes_sent'), reverse=True)
+    netifs = sorted(netifs, key=lambda x: x.get('bytes_sent'), reverse=True)
 
     # {'key', 'default_value'}
     # An empty string means that no filtering will take place on that key
@@ -231,7 +234,7 @@ def view_networks():
         'state': 'LISTEN'
     }
 
-    form_values = dict((k, request.args.get(k, default_val)) for k, default_val in form_keys.iteritems())
+    form_values = dict((k, request.args.get(k, default_val)) for k, default_val in form_keys.items())
 
     for k in ('local_addr', 'remote_addr'):
         val = request.args.get(k, '')
@@ -243,7 +246,7 @@ def view_networks():
             form_values[k + '_host'] = val
 
     conns = current_service.get_connections(form_values)
-    conns.sort(key=lambda x: x['state'])
+    conns= sorted(conns, key=lambda x: x['state'])
 
     states = [
         'ESTABLISHED', 'SYN_SENT', 'SYN_RECV',
@@ -270,7 +273,7 @@ def view_networks():
 def view_disks():
     disks = current_service.get_disks(all_partitions=True)
     io_counters = current_service.get_disks_counters().items()
-    io_counters.sort(key=lambda x: x[1]['read_count'], reverse=True)
+    io_counters = sorted(io_counters, key=lambda x: x[1]['read_count'], reverse=True)
     return render_template(
         'disks.html',
         page='disks',
@@ -283,7 +286,7 @@ def view_disks():
 @webapp.route('/logs')
 def view_logs():
     available_logs = current_service.get_logs()
-    available_logs.sort(cmp=lambda x1, x2: locale.strcoll(x1['path'], x2['path']))
+    available_logs = sorted(available_logs, key=lambda x1: locale.strxfrm(x1['path']))
 
     return render_template(
         'logs.html',

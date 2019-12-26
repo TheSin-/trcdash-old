@@ -4,7 +4,7 @@ import unittest2
 import base64
 import os
 import tempfile
-import urllib2
+import urllib3
 from trcdash.run import TRCDashRunner
 
 try:
@@ -145,11 +145,11 @@ class TestHttps(unittest2.TestCase):
 
     def test_https_dont_work_without_certs(self):
         self._run()
-        self.assertRaises(urllib2.URLError, urllib2.urlopen, 'https://127.0.0.1:5051')
+        self.assertRaises(urllib3.URLError, urllib3.urlopen, 'https://127.0.0.1:5051')
 
     def test_https_works_with_certs(self):
         self._run(https=True)
-        resp = urllib2.urlopen('https://127.0.0.1:5051')
+        resp = urllib3.urlopen('https://127.0.0.1:5051')
         self.assertEqual(resp.getcode(), httplib.OK)
 
 

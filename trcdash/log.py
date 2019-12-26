@@ -200,7 +200,7 @@ class Logs(object):
         return i
 
     def clear(self):
-        for r in self.readers.itervalues():
+        for r in self.readers.values():
             r.close()
         self.readers = {}
 
