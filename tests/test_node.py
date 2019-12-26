@@ -1,13 +1,13 @@
 import os
 import sys
 import platform
-from psdash.log import LogReader
+from trcdash.log import LogReader
 import socket
 import tempfile
 import unittest2
 import time
 import psutil
-from psdash.node import LocalNode
+from trcdash.node import LocalNode
 
 
 class TestNode(unittest2.TestCase):

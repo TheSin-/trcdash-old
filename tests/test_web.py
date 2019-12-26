@@ -5,7 +5,7 @@ import base64
 import os
 import tempfile
 import urllib2
-from psdash.run import PsDashRunner
+from trcdash.run import TRCDashRunner
 
 try:
     import httplib
@@ -18,12 +18,12 @@ class TestBasicAuth(unittest2.TestCase):
     default_password = 'secret'
 
     def setUp(self):
-        self.app = PsDashRunner().app
+        self.app = TRCDashRunner().app
         self.client = self.app.test_client()
 
     def _enable_basic_auth(self, username, password):
-        self.app.config['PSDASH_AUTH_USERNAME'] = username
-        self.app.config['PSDASH_AUTH_PASSWORD'] = password
+        self.app.config['TRCDASH_AUTH_USERNAME'] = username
+        self.app.config['TRCDASH_AUTH_PASSWORD'] = password
 
     def _create_auth_headers(self, username, password):
         data = base64.b64encode(':'.join([username, password]))
@@ -54,17 +54,17 @@ class TestBasicAuth(unittest2.TestCase):
 
 class TestAllowedRemoteAddresses(unittest2.TestCase):
     def test_correct_remote_address(self):
-        r = PsDashRunner({'PSDASH_ALLOWED_REMOTE_ADDRESSES': '127.0.0.1'})
+        r = TRCDashRunner({'TRCDASH_ALLOWED_REMOTE_ADDRESSES': '127.0.0.1'})
         resp = r.app.test_client().get('/', environ_overrides={'REMOTE_ADDR': '127.0.0.1'})
         self.assertEqual(resp.status_code, httplib.OK)
 
     def test_incorrect_remote_address(self):
-        r = PsDashRunner({'PSDASH_ALLOWED_REMOTE_ADDRESSES': '127.0.0.1'})
+        r = TRCDashRunner({'TRCDASH_ALLOWED_REMOTE_ADDRESSES': '127.0.0.1'})
         resp = r.app.test_client().get('/', environ_overrides={'REMOTE_ADDR': '10.0.0.1'})
         self.assertEqual(resp.status_code, httplib.UNAUTHORIZED)
 
     def test_multiple_remote_addresses(self):
-        r = PsDashRunner({'PSDASH_ALLOWED_REMOTE_ADDRESSES': '127.0.0.1, 10.0.0.1'})
+        r = TRCDashRunner({'TRCDASH_ALLOWED_REMOTE_ADDRESSES': '127.0.0.1, 10.0.0.1'})
 
         resp = r.app.test_client().get('/', environ_overrides={'REMOTE_ADDR': '10.0.0.1'})
         self.assertEqual(resp.status_code, httplib.OK)
@@ -76,7 +76,7 @@ class TestAllowedRemoteAddresses(unittest2.TestCase):
         self.assertEqual(resp.status_code, httplib.UNAUTHORIZED)
 
     def test_multiple_remote_addresses_using_list(self):
-        r = PsDashRunner({'PSDASH_ALLOWED_REMOTE_ADDRESSES': ['127.0.0.1', '10.0.0.1']})
+        r = TRCDashRunner({'TRCDASH_ALLOWED_REMOTE_ADDRESSES': ['127.0.0.1', '10.0.0.1']})
 
         resp = r.app.test_client().get('/', environ_overrides={'REMOTE_ADDR': '10.0.0.1'})
         self.assertEqual(resp.status_code, httplib.OK)
@@ -90,7 +90,7 @@ class TestAllowedRemoteAddresses(unittest2.TestCase):
 
 class TestEnvironmentWhitelist(unittest2.TestCase):
     def test_show_only_whitelisted(self):
-        r = PsDashRunner({'PSDASH_ENVIRON_WHITELIST': ['USER']})
+        r = TRCDashRunner({'TRCDASH_ENVIRON_WHITELIST': ['USER']})
         resp = r.app.test_client().get('/process/%d/environment' % os.getpid())
         self.assertTrue(os.environ['USER'] in resp.data)
         self.assertTrue('*hidden by whitelist*' in resp.data)
@@ -101,40 +101,40 @@ class TestUrlPrefix(unittest2.TestCase):
         self.default_prefix = '/subfolder/'
 
     def test_page_not_found_on_root(self):
-        r = PsDashRunner({'PSDASH_URL_PREFIX': self.default_prefix})
+        r = TRCDashRunner({'TRCDASH_URL_PREFIX': self.default_prefix})
         resp = r.app.test_client().get('/')
         self.assertEqual(resp.status_code, httplib.NOT_FOUND)
 
     def test_works_on_prefix(self):
-        r = PsDashRunner({'PSDASH_URL_PREFIX': self.default_prefix})
+        r = TRCDashRunner({'TRCDASH_URL_PREFIX': self.default_prefix})
         resp = r.app.test_client().get(self.default_prefix)
         self.assertEqual(resp.status_code, httplib.OK)
 
     def test_multiple_level_prefix(self):
-        r = PsDashRunner({'PSDASH_URL_PREFIX': '/use/this/folder/'})
+        r = TRCDashRunner({'TRCDASH_URL_PREFIX': '/use/this/folder/'})
         resp = r.app.test_client().get('/use/this/folder/')
         self.assertEqual(resp.status_code, httplib.OK)
 
     def test_missing_starting_slash_works(self):
-        r = PsDashRunner({'PSDASH_URL_PREFIX': 'subfolder/'})
+        r = TRCDashRunner({'TRCDASH_URL_PREFIX': 'subfolder/'})
         resp = r.app.test_client().get('/subfolder/')
         self.assertEqual(resp.status_code, httplib.OK)
 
     def test_missing_trailing_slash_works(self):
-        r = PsDashRunner({'PSDASH_URL_PREFIX': '/subfolder'})
+        r = TRCDashRunner({'TRCDASH_URL_PREFIX': '/subfolder'})
         resp = r.app.test_client().get('/subfolder/')
         self.assertEqual(resp.status_code, httplib.OK)
 
 
 class TestHttps(unittest2.TestCase):
     def _run(self, https=False):
-        options = {'PSDASH_PORT': 5051}
+        options = {'TRCDASH_PORT': 5051}
         if https:
             options.update({
-                'PSDASH_HTTPS_KEYFILE': os.path.join(os.path.dirname(__file__), 'keyfile'),
-                'PSDASH_HTTPS_CERTFILE': os.path.join(os.path.dirname(__file__), 'cacert.pem')
+                'TRCDASH_HTTPS_KEYFILE': os.path.join(os.path.dirname(__file__), 'keyfile'),
+                'TRCDASH_HTTPS_CERTFILE': os.path.join(os.path.dirname(__file__), 'cacert.pem')
             })
-        self.r = PsDashRunner(options)
+        self.r = TRCDashRunner(options)
         self.runner = gevent.spawn(self.r.run)
         gevent.sleep(0.3)
 
@@ -155,7 +155,7 @@ class TestHttps(unittest2.TestCase):
 
 class TestEndpoints(unittest2.TestCase):
     def setUp(self):
-        self.r = PsDashRunner()
+        self.r = TRCDashRunner()
         self.app = self.r.app
         self.client = self.app.test_client()
         self.pid = os.getpid()
@@ -255,7 +255,7 @@ class TestLogs(unittest2.TestCase):
         return filename
 
     def setUp(self):
-        self.r = PsDashRunner()
+        self.r = TRCDashRunner()
         self.app = self.r.app
         self.client = self.app.test_client()
         self.filename = self._create_log_file()

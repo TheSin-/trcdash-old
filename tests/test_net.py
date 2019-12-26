@@ -1,6 +1,6 @@
 import unittest2
 import socket
-from psdash.net import NetIOCounters
+from trcdash.net import NetIOCounters
 
 
 class TestNet(unittest2.TestCase):

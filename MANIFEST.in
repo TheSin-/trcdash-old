@@ -1,2 +1,2 @@
-recursive-include psdash/static *
-recursive-include psdash/templates *
+recursive-include trcdash/static *
+recursive-include trcdash/templates *

@@ -4,7 +4,7 @@ import tempfile
 import unittest2
 import time
 from cStringIO import StringIO
-from psdash.log import Logs, LogReader, LogError, ReverseFileSearcher
+from trcdash.log import Logs, LogReader, LogError, ReverseFileSearcher
 
 
 class TestLogs(unittest2.TestCase):

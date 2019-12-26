@@ -6,12 +6,12 @@ import psutil
 import socket
 import time
 import zerorpc
-from psdash.log import Logs
-from psdash.helpers import socket_families, socket_types
-from psdash.net import get_interface_addresses, NetIOCounters
+from trcdash.log import Logs
+from trcdash.helpers import socket_families, socket_types
+from trcdash.net import get_interface_addresses, NetIOCounters
 
 
-logger = logging.getLogger("psdash.node")
+logger = logging.getLogger("trcdash.node")
 
 
 class Node(object):
@@ -55,7 +55,7 @@ class RemoteNode(Node):
 class LocalNode(Node):
     def __init__(self):
         super(LocalNode, self).__init__()
-        self.name = "psDash"
+        self.name = "TRCDash"
         self.net_io_counters = NetIOCounters()
         self.logs = Logs()
 

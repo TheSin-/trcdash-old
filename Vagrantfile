@@ -5,7 +5,7 @@ VAGRANTFILE_API_VERSION = "2"
 
 box = {
     :box => "ubuntu/trusty64",
-    :hostname => "psdash-dev",
+    :hostname => "trcdash-dev",
     :ram => 256
 }
 

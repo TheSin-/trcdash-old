@@ -7,14 +7,14 @@ import uuid
 import locale
 from flask import render_template, request, session, jsonify, Response, Blueprint, current_app, g
 from werkzeug.local import LocalProxy
-from psdash.helpers import socket_families, socket_types
+from trcdash.helpers import socket_families, socket_types
 
-logger = logging.getLogger('psdash.web')
-webapp = Blueprint('psdash', __name__, static_folder='static')
+logger = logging.getLogger('trcdash.web')
+webapp = Blueprint('trcdash', __name__, static_folder='static')
 
 
 def get_current_node():
-    return current_app.psdash.get_node(g.node)
+    return current_app.trcdash.get_node(g.node)
 
 
 def get_current_service():
@@ -32,7 +32,7 @@ def fromtimestamp(value, dateformat='%Y-%m-%d %H:%M:%S'):
 
 @webapp.context_processor
 def inject_nodes():
-    return {"current_node": current_node, "nodes": current_app.psdash.get_nodes()}
+    return {"current_node": current_node, "nodes": current_app.trcdash.get_nodes()}
 
 
 @webapp.context_processor
@@ -53,15 +53,15 @@ def add_node(endpoint, values):
 
 @webapp.before_request
 def add_node():
-    g.node = request.args.get('node', current_app.psdash.LOCAL_NODE)
+    g.node = request.args.get('node', current_app.trcdash.LOCAL_NODE)
 
 
 @webapp.before_request
 def check_access():
     if not current_node:
-        return 'Unknown psdash node specified', 404
+        return 'Unknown trcdash node specified', 404
 
-    allowed_remote_addrs = current_app.config.get('PSDASH_ALLOWED_REMOTE_ADDRESSES')
+    allowed_remote_addrs = current_app.config.get('TRCDASH_ALLOWED_REMOTE_ADDRESSES')
     if allowed_remote_addrs:
         if request.remote_addr not in allowed_remote_addrs:
             current_app.logger.info(
@@ -71,15 +71,15 @@ def check_access():
             current_app.logger.debug('Allowed addresses: %s', allowed_remote_addrs)
             return 'Access denied', 401
 
-    username = current_app.config.get('PSDASH_AUTH_USERNAME')
-    password = current_app.config.get('PSDASH_AUTH_PASSWORD')
+    username = current_app.config.get('TRCDASH_AUTH_USERNAME')
+    password = current_app.config.get('TRCDASH_AUTH_PASSWORD')
     if username and password:
         auth = request.authorization
         if not auth or auth.username != username or auth.password != password:
             return Response(
                 'Access deined',
                 401,
-                {'WWW-Authenticate': 'Basic realm="psDash login required"'}
+                {'WWW-Authenticate': 'Basic realm="TRCDash login required"'}
             )
 
 
@@ -185,7 +185,7 @@ def process(pid, section):
     if section == 'environment':
         penviron = current_service.get_process_environment(pid)
 
-        whitelist = current_app.config.get('PSDASH_ENVIRON_WHITELIST')
+        whitelist = current_app.config.get('TRCDASH_ENVIRON_WHITELIST')
         if whitelist:
             penviron = dict((k, v if k in whitelist else '*hidden by whitelist*') 
                              for k, v in penviron.iteritems())
@@ -325,5 +325,5 @@ def register_node():
     port = request.args['port']
     host = request.remote_addr
 
-    current_app.psdash.register_node(name, host, port)
+    current_app.trcdash.register_node(name, host, port)
     return jsonify({'status': 'OK'})

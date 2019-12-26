@@ -3,7 +3,7 @@ import glob2
 import os
 import logging
 
-logger = logging.getLogger('psdash.log')
+logger = logging.getLogger('trcdash.log')
 
 
 class LogError(Exception):
